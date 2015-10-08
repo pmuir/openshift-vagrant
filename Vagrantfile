@@ -7,9 +7,15 @@ Vagrant.configure('2') do |config|
     # Box name
     vagrant_host.vm.hostname = 'openshift-enterprise-pmuir'
     vagrant_host.vm.box = "rhel-server-virtualbox-7.1-3"
+    vagrant_host.vm.network "forwarded_port", guest: 8443, host: 8443
     vagrant_host.vm.synced_folder '.', '/vagrant', disabled: true
     vagrant_host.vm.synced_folder '.', '/mnt/vagrant', type: 'rsync'
     vagrant_host.nfs.functional = false
+
+    vagrant_host.vm.provider "virtualbox" do |v|
+      v.memory = 2048
+      v.cpus = 2
+    end
 
     # Attach subscriptions, enable repos, install packages
     # Fix this so we only attach one sub :-)
