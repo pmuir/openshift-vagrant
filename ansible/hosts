@@ -14,7 +14,7 @@ ansible_ssh_user=root
 product_type=openshift
 deployment_type=enterprise
 
-# enable AllowAllPasswordIdentityProvider
+# enable AllowAllPasswordIdentityProvider, as we don't need security for local developer environments. If we used the HTTP provider with user/pwds in a file, then that would be insecure by virtue of the hard coded user/pwds
 openshift_master_identity_providers=[{'name': 'allow_all_auth', 'login': 'true', 'challenge': 'true', 'kind': 'AllowAllPasswordIdentityProvider'}]
 
 # host group for masters
