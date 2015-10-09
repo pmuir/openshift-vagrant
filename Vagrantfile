@@ -55,7 +55,7 @@ Vagrant.configure('2') do |config|
 	# Run ansible
 	config.vm.provision 'shell', inline: "rm -rf openshift-ansible && git clone https://github.com/openshift/openshift-ansible"
 	config.vm.provision 'shell', inline: "mkdir -p /etc/ansible && cp /home/vagrant/sync/ansible/hosts /etc/ansible"
-	# config.vm.provision 'shell', inline: "ansible-playbook /home/vagrant/openshift-ansible/playbooks/byo/config.yml"
+	config.vm.provision 'shell', inline: "ansible-playbook /home/vagrant/openshift-ansible/playbooks/byo/config.yml"
 
 	# Uninstall Ansible
 	config.vm.provision 'shell', inline: "yum -y remove ansible"
