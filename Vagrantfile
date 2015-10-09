@@ -19,7 +19,6 @@ Vagrant.configure('2') do |config|
 	config.vm.hostname = 'openshift-enterprise-pmuir'
 	config.vm.box = "rhel-server-virtualbox-7.1-3"
 	config.vm.synced_folder '.', '/vagrant', disabled: true
-	config.vm.synced_folder '.', '/mnt/vagrant', type: 'rsync'
 	config.nfs.functional = false
 	config.vm.network "private_network", ip: ENV['VM_IP'] || '10.0.2.15'
 
@@ -31,9 +30,11 @@ Vagrant.configure('2') do |config|
 	config.vm.provision 'shell', inline: "yum -y install wget git net-tools bind-utils iptables-services bridge-utils gcc python-virtualenv docker ansible && yum update -y && yum clean all"
 
 	# Install Guest Additions
-	config.vm.provision 'shell', inline: "mkdir /mnt/cdrom && mount /dev/cdrom /mnt/cdrom"
-	config.vm.provision 'shell', inline: "/mnt/cdrom/VBoxLinuxAdditions.run"
+	config.vm.provision 'shell', inline: "mkdir /mnt/cdrom && mount /dev/cdrom /mnt/cdrom"\
+	# We are expecting this to fail, as there is no XWindows on the VM
+	config.vm.provision 'shell', inline: "/mnt/cdrom/VBoxLinuxAdditions.run || true"
 	config.vm.provision 'shell', inline: "umount -f /mnt/cdrom && rm -rf /mnt/cdrom"
+	# Need to reboot to load Guest Additions
 	config.vm.provision :reload
 
 	# Configure Docker
