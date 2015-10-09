@@ -19,6 +19,7 @@
    $ ls -1 \*.gem
    $ vagrant plugin install vagrant-registration-0.0.8.gem
    $ vagrant plugin install vagrant-vbguest
+   $ vagrant plugin install vagrant-reload
    ```
    Verify the plugins are installed:
    

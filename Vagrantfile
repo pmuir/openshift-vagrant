@@ -4,18 +4,24 @@
 Vagrant.configure('2') do |config|
 	# it is important that the name of this box is "default"
 	config.vbguest.auto_update = false
+	
+	windows = (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM) != nil
+    guest_additions = ENV['GUEST_ADDITIONS_PATH'] || (windows ? "C:\\Program files\\Oracle\\VirtualBox\\VBoxGuestAdditions.iso" :  "/opt/VirtualBox/VBoxGuestAdditions.iso")
+	
 	config.vm.provider "virtualbox" do |v|
 		v.memory = 2048
 		v.cpus = 2
 		v.customize ["modifyvm", :id, "--natnet1", "10.1/16"]
+		v.customize ["storageattach", :id, "--storagectl", "IDE Controller", "--port", "1", "--device", "0", "--type", "dvddrive", "--medium", guest_additions]
 	end
+	
 	# Box name
 	config.vm.hostname = 'openshift-enterprise-pmuir'
 	config.vm.box = "rhel-server-virtualbox-7.1-3"
 	config.vm.synced_folder '.', '/vagrant', disabled: true
 	config.vm.synced_folder '.', '/mnt/vagrant', type: 'rsync'
 	config.nfs.functional = false
-	config.vm.network "private_network", ip: "10.0.2.15"
+	config.vm.network "private_network", ip: ENV['VM_IP'] || '10.0.2.15'
 
 	# Attach subscriptions, enable repos, install packages
 	# Fix this so we only attach one sub :-)
@@ -23,7 +29,13 @@ Vagrant.configure('2') do |config|
 	config.vm.provision 'shell', inline: "subscription-manager repos --enable=\"rhel-7-server-rpms\" --enable=\"rhel-7-server-extras-rpms\" --enable=\"rhel-7-server-ose-3.0-rpms\""
 	config.vm.provision 'shell', inline: "rpm -qa | grep -q epel-release || rpm -ivh http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
 	config.vm.provision 'shell', inline: "yum -y install wget git net-tools bind-utils iptables-services bridge-utils gcc python-virtualenv docker ansible && yum update -y && yum clean all"
-
+	
+	# Install Guest Additions
+	config.vm.provision 'shell', inline: "mkdir /mnt/cdrom && mount /dev/cdrom /mnt/cdrom"
+	config.vm.provision 'shell', inline: "/mnt/cdrom/VBoxLinuxAdditions.run"
+	config.vm.provision 'shell', inline: "umount -f /mnt/cdrom && rm -rf /mnt/cdrom"
+	config.vm.provision :reload
+	
 	# Configure Docker
 	config.vm.provision 'shell', inline: "grep -q \"insecure-registry 172.30.0.0/16\" /etc/sysconfig/docker || echo \"INSECURE_REGISTRY='--selinux-enabled --insecure-registry 172.30.0.0/16'\" | tee --append /etc/sysconfig/docker > /dev/null"
 
@@ -43,7 +55,7 @@ Vagrant.configure('2') do |config|
 	# Run ansible
 	config.vm.provision 'shell', inline: "rm -rf openshift-ansible && git clone https://github.com/openshift/openshift-ansible"
 	config.vm.provision 'shell', inline: "mkdir -p /etc/ansible && cp /home/vagrant/sync/ansible/hosts /etc/ansible"
-	config.vm.provision 'shell', inline: "ansible-playbook /home/vagrant/openshift-ansible/playbooks/byo/config.yml"
+	# config.vm.provision 'shell', inline: "ansible-playbook /home/vagrant/openshift-ansible/playbooks/byo/config.yml"
 
 	# Uninstall Ansible
 	config.vm.provision 'shell', inline: "yum -y remove ansible"
