@@ -6,7 +6,7 @@ Vagrant.configure('2') do |config|
 	config.vbguest.auto_update = false
 
 	windows = (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM) != nil
-    guest_additions = ENV['GUEST_ADDITIONS_PATH'] || (windows ? "C:\\Program files\\Oracle\\VirtualBox\\VBoxGuestAdditions.iso" :  "/opt/VirtualBox/VBoxGuestAdditions.iso")
+    guest_additions = ENV['GUEST_ADDITIONS_PATH'] || (windows ? "C:\\Program files\\Oracle\\VirtualBox\\VBoxGuestAdditions.iso" :  "/usr/share/virtualbox/VBoxGuestAdditions.iso")
 
 	config.vm.provider "virtualbox" do |v|
 		v.memory = 2048
