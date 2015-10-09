@@ -18,6 +18,7 @@
    $ cd ~/cdk/plugins
    $ ls -1 \*.gem
    $ vagrant plugin install vagrant-registration-0.0.8.gem
+   $ vagrant plugin install vagrant-vbguest
    ```
    Verify the plugins are installed:
    
