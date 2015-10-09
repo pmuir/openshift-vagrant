@@ -5,6 +5,8 @@ Vagrant.configure('2') do |config|
 	# it is important that the name of this box is "default"
 	config.vbguest.auto_update = false
 	config.vm.provider "virtualbox" do |v|
+		v.memory = 2048
+		v.cpus = 2
 		v.customize ["modifyvm", :id, "--natnet1", "10.1/16"]
 	end
 	# Box name
@@ -16,7 +18,7 @@ Vagrant.configure('2') do |config|
 	config.vm.network "private_network", ip: "10.0.2.15"
 
 	# Attach subscriptions, enable repos, install packages
-	# Fix this so we only attach one sub :-)	
+	# Fix this so we only attach one sub :-)
 	config.vm.provision 'shell', inline: "subscription-manager list --installed | grep -q \"Red Hat OpenShift Enterprise\" || subscription-manager list --matches=\"*OpenShift Enterprise*\" --available --all --pool-only | subscription-manager attach --file=-"
 	config.vm.provision 'shell', inline: "subscription-manager repos --enable=\"rhel-7-server-rpms\" --enable=\"rhel-7-server-extras-rpms\" --enable=\"rhel-7-server-ose-3.0-rpms\""
 	config.vm.provision 'shell', inline: "rpm -qa | grep -q epel-release || rpm -ivh http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
