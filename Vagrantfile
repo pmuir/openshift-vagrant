@@ -4,17 +4,17 @@
 Vagrant.configure('2') do |config|
 	# it is important that the name of this box is "default"
 	config.vbguest.auto_update = false
-	
+
 	windows = (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM) != nil
     guest_additions = ENV['GUEST_ADDITIONS_PATH'] || (windows ? "C:\\Program files\\Oracle\\VirtualBox\\VBoxGuestAdditions.iso" :  "/opt/VirtualBox/VBoxGuestAdditions.iso")
-	
+
 	config.vm.provider "virtualbox" do |v|
 		v.memory = 2048
 		v.cpus = 2
-		v.customize ["modifyvm", :id, "--natnet1", "10.1/16"]
+		v.customize ["modifyvm", :id, "--natnet1", "172.12/16"]
 		v.customize ["storageattach", :id, "--storagectl", "IDE Controller", "--port", "1", "--device", "0", "--type", "dvddrive", "--medium", guest_additions]
 	end
-	
+
 	# Box name
 	config.vm.hostname = 'openshift-enterprise-pmuir'
 	config.vm.box = "rhel-server-virtualbox-7.1-3"
@@ -29,13 +29,13 @@ Vagrant.configure('2') do |config|
 	config.vm.provision 'shell', inline: "subscription-manager repos --enable=\"rhel-7-server-rpms\" --enable=\"rhel-7-server-extras-rpms\" --enable=\"rhel-7-server-ose-3.0-rpms\""
 	config.vm.provision 'shell', inline: "rpm -qa | grep -q epel-release || rpm -ivh http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
 	config.vm.provision 'shell', inline: "yum -y install wget git net-tools bind-utils iptables-services bridge-utils gcc python-virtualenv docker ansible && yum update -y && yum clean all"
-	
+
 	# Install Guest Additions
 	config.vm.provision 'shell', inline: "mkdir /mnt/cdrom && mount /dev/cdrom /mnt/cdrom"
 	config.vm.provision 'shell', inline: "/mnt/cdrom/VBoxLinuxAdditions.run"
 	config.vm.provision 'shell', inline: "umount -f /mnt/cdrom && rm -rf /mnt/cdrom"
 	config.vm.provision :reload
-	
+
 	# Configure Docker
 	config.vm.provision 'shell', inline: "grep -q \"insecure-registry 172.30.0.0/16\" /etc/sysconfig/docker || echo \"INSECURE_REGISTRY='--selinux-enabled --insecure-registry 172.30.0.0/16'\" | tee --append /etc/sysconfig/docker > /dev/null"
 
