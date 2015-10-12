@@ -1,13 +1,35 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+module OS
+    def OS.windows?
+        (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM) != nil
+    end
+
+    def OS.mac?
+        (/darwin/ =~ RUBY_PLATFORM) != nil
+    end
+
+    def OS.unix?
+        !OS.windows?
+    end
+
+    def OS.linux?
+        OS.unix? and not OS.mac?
+    end
+end
+
 Vagrant.configure('2') do |config|
-	# it is important that the name of this box is "default"
-	config.vbguest.auto_update = false
+       # it is important that the name of this box is "default"
 
-	windows = (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM) != nil
-    guest_additions = ENV['GUEST_ADDITIONS_PATH'] || (windows ? "C:\\Program files\\Oracle\\VirtualBox\\VBoxGuestAdditions.iso" :  "/usr/share/virtualbox/VBoxGuestAdditions.iso")
-
+       if(OS.windows?)
+         guest_additions = ENV['GUEST_ADDITIONS_PATH'] || "C:\\Program files\\Oracle\\VirtualBox\\VBoxGuestAdditions.iso"
+       elsif OS.mac?
+         guest_additions = ENV['GUEST_ADDITIONS_PATH'] || "/Applications/VirtualBox.app/Contents/MacOS/VBoxGuestAdditions.iso"
+       else
+         guest_additions = ENV['GUEST_ADDITIONS_PATH'] || "/usr/share/virtualbox/VBoxGuestAdditions.iso"
+       end
+       
 	config.vm.provider "virtualbox" do |v|
 		v.memory = 2048
 		v.cpus = 2
