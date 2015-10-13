@@ -1,1 +1,3 @@
+# Vagrant artifacts
 .vagrant
+package.box
